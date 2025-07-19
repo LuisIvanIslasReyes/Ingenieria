@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}Completados por Usuario - Parra's Dev TODO{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-person-check text-success"></i> Completados - ID y UserID</h1>
+            <div>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Dashboard
+                </a>
+                <a href="{% url 'todo_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus"></i> Crear Todo
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-check-circle"></i> Todos Completados por Usuario</h5>
+                <span class="badge bg-light text-dark fs-6">{{ todos.count }} completados</span>
+            </div>
+            <div class="card-body">
+                {% if todos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="15%">Todo ID</th>
+                                    <th width="15%">User ID</th>
+                                    <th width="35%">Usuario</th>
+                                    <th width="20%">Fecha Completado</th>
+                                    <th width="15%">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for todo in todos %}
+                                <tr class="table-success">
+                                    <td>
+                                        <strong class="text-success">#{{ todo.id }}</strong>
+                                        <i class="bi bi-check-circle text-success ms-1"></i>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">{{ todo.user.id }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person-check-fill text-success me-2"></i>
+                                            <div>
+                                                <div class="fw-bold">{{ todo.user.username }}</div>
+                                                <small class="text-muted">{{ todo.user.first_name }} {{ todo.user.last_name }}</small>
+                                                {% if todo.user.email %}
+                                                    <br><small class="text-muted">{{ todo.user.email }}</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <i class="bi bi-calendar-check text-success"></i> 
+                                        {{ todo.updated_at|date:"d/m/Y" }}
+                                        <br><small class="text-muted">{{ todo.updated_at|date:"H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <form method="post" action="{% url 'todo_toggle' todo.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" 
+                                                        class="btn btn-warning" 
+                                                        title="Reactivar como pendiente">
+                                                    <i class="bi bi-arrow-clockwise"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Análisis por usuario -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card bg-success bg-opacity-10">
+                                <div class="card-header">
+                                    <h6 class="mb-0 text-success">
+                                        <i class="bi bi-trophy"></i> Top Performers - Completados por Usuario
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        {% regroup todos by user as user_groups %}
+                                        {% for user_group in user_groups %}
+                                        <div class="col-md-6 col-lg-4 mb-3">
+                                            <div class="card border-success h-100">
+                                                <div class="card-body text-center">
+                                                    <i class="bi bi-person-check display-6 text-success"></i>
+                                                    <h6 class="card-title mt-2">{{ user_group.grouper.username }}</h6>
+                                                    <p class="text-muted small mb-2">ID: {{ user_group.grouper.id }}</p>
+                                                    <div class="d-flex justify-content-center">
+                                                        <span class="badge bg-success fs-5">
+                                                            {{ user_group.list|length }} completado{{ user_group.list|length|pluralize:",s" }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">
+                                                            Último: {% with user_group.list|first as first_item %}
+                                                                    {{ first_item.updated_at|date:"d/m/Y" }}
+                                                                    {% endwith %}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-person-x display-1 text-muted"></i>
+                        <h3 class="text-muted mt-3">No hay todos completados por usuarios</h3>
+                        <p class="text-muted">Cuando los usuarios completen tareas aparecerán aquí.</p>
+                        <div class="mt-3">
+                            <a href="{% url 'todo_pending_user_list' %}" class="btn btn-warning me-2">
+                                <i class="bi bi-person-x"></i> Ver Pendientes por Usuario
+                            </a>
+                            <a href="{% url 'sync_todos' %}" class="btn btn-success">
+                                <i class="bi bi-arrow-clockwise"></i> Sincronizar API
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas generales -->
+{% if todos %}
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h4>{{ todos.count }}</h4>
+                <p class="mb-0"><i class="bi bi-check-circle"></i> Total Completados</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                {% regroup todos by user as user_groups %}
+                <h4>{{ user_groups|length }}</h4>
+                <p class="mb-0"><i class="bi bi-people"></i> Usuarios Activos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                {% regroup todos by user as user_groups %}
+                {% for user_group in user_groups %}
+                    {% if forloop.first %}
+                        <h4>{{ user_group.list|length }}</h4>
+                        <p class="mb-0"><i class="bi bi-award"></i> Top Usuario: {{ user_group.grouper.username }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Enlaces relacionados -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="mb-3">Vistas Relacionadas</h6>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'todo_pending_user_list' %}" class="btn btn-outline-warning">
+                        <i class="bi bi-person-x"></i> Pendientes por Usuario
+                    </a>
+                    <a href="{% url 'todo_user_list' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-people"></i> Todos por Usuario
+                    </a>
+                    <a href="{% url 'todo_completed_list' %}" class="btn btn-outline-success">
+                        <i class="bi bi-check-circle"></i> Solo Completados
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
