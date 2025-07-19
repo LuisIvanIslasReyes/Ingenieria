@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Parra's Dev - Todo Manager Tool{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        /* Paleta Azul Grisáceo Muy elegante */
+        :root {
+            --primary-blue: #4A6B7C;
+            --secondary-blue: #5B7A8C;
+            --light-blue: #7A9BAF;
+            --dark-blue: #364B5A;
+            --accent-blue: #6B8FA3;
+            --background-light: #F5F7F9;
+            --background-card: #FDFDFE;
+            --text-primary: #2C3E50;
+            --text-secondary: #546E7A;
+            --border-light: #E1E8ED;
+            --success-blue: #4A7C59;
+            --warning-blue: #7C6B4A;
+            --danger-blue: #7C4A5B;
+        }
+
+        body {
+            background-color: var(--background-light);
+            color: var(--text-primary);
+        }
+
+        .navbar-dark {
+            background-color: var(--primary-blue) !important;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: #ffffff !important;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--light-blue) !important;
+        }
+
+        .dropdown-menu {
+            background-color: var(--background-card);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 12px rgba(74, 107, 124, 0.15);
+        }
+
+        .dropdown-item {
+            color: var(--text-primary);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--background-light);
+            color: var(--primary-blue);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-blue);
+            border-color: var(--dark-blue);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-blue);
+            border-color: var(--secondary-blue);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .btn-success {
+            background-color: var(--success-blue);
+            border-color: var(--success-blue);
+        }
+
+        .btn-warning {
+            background-color: var(--warning-blue);
+            border-color: var(--warning-blue);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .card {
+            background-color: var(--background-card);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 2px 8px rgba(74, 107, 124, 0.08);
+            border-radius: 12px;
+        }
+
+        .card-header {
+            background-color: var(--primary-blue);
+            color: white;
+            border-bottom: 1px solid var(--border-light);
+            border-radius: 12px 12px 0 0 !important;
+        }
+
+        .card-header.bg-success {
+            background-color: var(--success-blue) !important;
+        }
+
+        .card-header.bg-warning {
+            background-color: var(--warning-blue) !important;
+        }
+
+        .card-header.bg-info {
+            background-color: var(--accent-blue) !important;
+        }
+
+        .table {
+            color: var(--text-primary);
+        }
+
+        .table-light {
+            background-color: var(--background-light);
+        }
+
+        .table-success {
+            background-color: rgba(74, 124, 89, 0.1);
+        }
+
+        .table-warning {
+            background-color: rgba(124, 107, 74, 0.1);
+        }
+
+        .table-info {
+            background-color: rgba(107, 143, 163, 0.1);
+        }
+
+        .todo-card {
+            transition: all 0.3s ease;
+            background-color: var(--background-card);
+            border: 1px solid var(--border-light);
+        }
+
+        .todo-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(74, 107, 124, 0.15);
+            border-color: var(--light-blue);
+        }
+
+        .completed {
+            opacity: 0.7;
+            text-decoration: line-through;
+        }
+
+        .footer {
+            background-color: var(--dark-blue);
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 50px;
+        }
+
+        .footer h5 {
+            color: var(--light-blue);
+        }
+
+        .text-success {
+            color: var(--success-blue) !important;
+        }
+
+        .text-warning {
+            color: var(--warning-blue) !important;
+        }
+
+        .text-info {
+            color: var(--accent-blue) !important;
+        }
+
+        .text-primary {
+            color: var(--primary-blue) !important;
+        }
+
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+
+        .alert-success {
+            background-color: rgba(74, 124, 89, 0.1);
+            color: var(--success-blue);
+        }
+
+        .alert-warning {
+            background-color: rgba(124, 107, 74, 0.1);
+            color: var(--warning-blue);
+        }
+
+        .alert-info {
+            background-color: rgba(107, 143, 163, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .badge.bg-light {
+            background-color: rgba(255, 255, 255, 0.9) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .badge.bg-primary {
+            background-color: var(--primary-blue) !important;
+        }
+
+        .badge.bg-success {
+            background-color: var(--success-blue) !important;
+        }
+
+        .badge.bg-warning {
+            background-color: var(--warning-blue) !important;
+        }
+
+        .border-success {
+            border-color: var(--success-blue) !important;
+        }
+
+        .border-warning {
+            border-color: var(--warning-blue) !important;
+        }
+
+        .border-primary {
+            border-color: var(--primary-blue) !important;
+        }
+
+        .bg-light {
+            background-color: var(--background-light) !important;
+        }
+
+        .text-muted {
+            color: var(--text-secondary) !important;
+        }
+
+        /* Efectos de hover mejorados */
+        .btn {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(74, 107, 124, 0.2);
+        }
+
+        /* Estilos para iconos */
+        .bi {
+            transition: color 0.3s ease;
+        }
+
+        /* Mejoras de accesibilidad */
+        .nav-link:focus,
+        .btn:focus {
+            outline: 2px solid var(--light-blue);
+            outline-offset: 2px;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">
+                <i class="bi bi-check2-square"></i> Parra's Dev TODO
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard' %}">
+                            <i class="bi bi-house-door"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="listasDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-list-ul"></i> Listas
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'todo_ids_list' %}">Solo IDs</a></li>
+                            <li><a class="dropdown-item" href="{% url 'todo_full_list' %}">IDs y Títulos</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'todo_pending_list' %}">Pendientes (ID y Título)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'todo_completed_list' %}">Completados (ID y Título)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'todo_user_list' %}">IDs y UserID</a></li>
+                            <li><a class="dropdown-item" href="{% url 'todo_completed_user_list' %}">Completados (ID y UserID)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'todo_pending_user_list' %}">Pendientes (ID y UserID)</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'todo_create' %}">
+                            <i class="bi bi-plus-circle"></i> Crear Todo
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'sync_todos' %}">
+                            <i class="bi bi-arrow-clockwise"></i> Sincronizar API
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i> {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">Cerrar Sesión</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">
+                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Parra's Dev TODO Manager</h5>
+                    <p class="text-muted">Gestión profesional de pendientes para equipos de desarrollo.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted">
+                        &copy; 2025 Parra's Dev. Hecho con <i class="bi bi-heart-fill text-danger"></i> y Django.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

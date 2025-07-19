@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Pendientes por Usuario - Parra's Dev TODO{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-person-x text-warning"></i> Pendientes - ID y UserID</h1>
+            <div>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Dashboard
+                </a>
+                <a href="{% url 'todo_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus"></i> Crear Todo
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-clock"></i> Todos Pendientes por Usuario</h5>
+                <span class="badge bg-dark fs-6">{{ todos.count }} pendientes</span>
+            </div>
+            <div class="card-body">
+                {% if todos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="15%">Todo ID</th>
+                                    <th width="15%">User ID</th>
+                                    <th width="35%">Usuario</th>
+                                    <th width="20%">Fecha Creación</th>
+                                    <th width="15%">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for todo in todos %}
+                                <tr class="table-warning">
+                                    <td>
+                                        <strong class="text-warning">#{{ todo.id }}</strong>
+                                        <i class="bi bi-clock text-warning ms-1"></i>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning text-dark">{{ todo.user.id }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person-exclamation text-warning me-2"></i>
+                                            <div>
+                                                <div class="fw-bold">{{ todo.user.username }}</div>
+                                                <small class="text-muted">{{ todo.user.first_name }} {{ todo.user.last_name }}</small>
+                                                {% if todo.user.email %}
+                                                    <br><small class="text-muted">{{ todo.user.email }}</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <i class="bi bi-calendar-plus text-warning"></i> 
+                                        {{ todo.created_at|date:"d/m/Y" }}
+                                        <br><small class="text-muted">{{ todo.created_at|date:"H:i" }}</small>
+                                        {% if todo.updated_at != todo.created_at %}
+                                            <br><small class="text-muted">Mod: {{ todo.updated_at|date:"d/m H:i" }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <form method="post" action="{% url 'todo_toggle' todo.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" 
+                                                        class="btn btn-success" 
+                                                        title="Marcar como completado">
+                                                    <i class="bi bi-check"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Análisis de carga de trabajo -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card bg-warning bg-opacity-10">
+                                <div class="card-header">
+                                    <h6 class="mb-0 text-warning">
+                                        <i class="bi bi-exclamation-triangle"></i> Carga de Trabajo Pendiente por Usuario
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        {% regroup todos by user as user_groups %}
+                                        {% for user_group in user_groups %}
+                                        <div class="col-md-6 col-lg-4 mb-3">
+                                            <div class="card border-warning h-100">
+                                                <div class="card-body text-center">
+                                                    <i class="bi bi-person-x display-6 text-warning"></i>
+                                                    <h6 class="card-title mt-2">{{ user_group.grouper.username }}</h6>
+                                                    <p class="text-muted small mb-2">ID: {{ user_group.grouper.id }}</p>
+                                                    <div class="d-flex justify-content-center">
+                                                        <span class="badge bg-warning text-dark fs-5">
+                                                            {{ user_group.list|length }} pendiente{{ user_group.list|length|pluralize:",s" }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">
+                                                            Más antiguo: {% with user_group.list|last as last_user %}
+                                                                            {{ last_user.created_at|date:"d/m/Y" }}
+                                                                            {% endwith %}
+                                                        </small>
+                                                    </div>
+                                                    
+                                                    <!-- Indicador de prioridad -->
+                                                    {% if user_group.list|length > 5 %}
+                                                        <div class="mt-2">
+                                                            <span class="badge bg-danger">
+                                                                <i class="bi bi-exclamation-triangle"></i> Alta carga
+                                                            </span>
+                                                        </div>
+                                                    {% elif user_group.list|length > 2 %}
+                                                        <div class="mt-2">
+                                                            <span class="badge bg-warning text-dark">
+                                                                <i class="bi bi-dash-circle"></i> Carga media
+                                                            </span>
+                                                        </div>
+                                                    {% else %}
+                                                        <div class="mt-2">
+                                                            <span class="badge bg-success">
+                                                                <i class="bi bi-check-circle"></i> Carga baja
+                                                            </span>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-person-check display-1 text-success"></i>
+                        <h3 class="text-success mt-3">¡Excelente! No hay pendientes</h3>
+                        <p class="text-muted">Todos los usuarios han completado sus tareas.</p>
+                        <div class="mt-3">
+                            <a href="{% url 'todo_completed_user_list' %}" class="btn btn-success me-2">
+                                <i class="bi bi-person-check"></i> Ver Completados
+                            </a>
+                            <a href="{% url 'todo_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus"></i> Crear Nuevo Todo
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas de urgencia -->
+{% if todos %}
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <h4>{{ todos.count }}</h4>
+                <p class="mb-0"><i class="bi bi-clock"></i> Total Pendientes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                {% regroup todos by user as user_groups %}
+                {% for user_group in user_groups %}
+                    {% if user_group.list|length > 5 %}
+                        {% if forloop.first %}
+                            <h4>{{ user_groups|length }}</h4>
+                            <p class="mb-0"><i class="bi bi-exclamation-triangle"></i> Usuarios Sobrecargados</p>
+                        {% endif %}
+                    {% endif %}
+                {% empty %}
+                    <h4>0</h4>
+                    <p class="mb-0"><i class="bi bi-check-circle"></i> Sin Sobrecargas</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                {% regroup todos by user as user_groups %}
+                <h4>{{ user_groups|length }}</h4>
+                <p class="mb-0"><i class="bi bi-people"></i> Usuarios con Pendientes</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Enlaces relacionados -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="mb-3">Vistas Relacionadas</h6>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'todo_completed_user_list' %}" class="btn btn-outline-success">
+                        <i class="bi bi-person-check"></i> Completados por Usuario
+                    </a>
+                    <a href="{% url 'todo_user_list' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-people"></i> Todos por Usuario
+                    </a>
+                    <a href="{% url 'todo_pending_list' %}" class="btn btn-outline-warning">
+                        <i class="bi bi-clock"></i> Solo Pendientes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if todo %}Editar Todo{% else %}Crear Todo{% endif %} - Parra's Dev TODO
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="bi bi-{% if todo %}pencil{% else %}plus{% endif %}"></i> 
+                {{ title|default:"Gestionar Todo" }}
+            </h1>
+            <div>
+                <a href="{% url 'todo_full_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver a Lista
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-{% if todo %}pencil-square{% else %}plus-square{% endif %}"></i>
+                    {% if todo %}Editar Todo #{{ todo.id }}{% else %}Crear Nuevo Todo{% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">
+                                    <i class="bi bi-card-text"></i> {{ form.title.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.help_text %}
+                                    <div class="form-text">{{ form.title.help_text }}</div>
+                                {% endif %}
+                                {% if form.title.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.title.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-check-circle"></i> Estado
+                                </label>
+                                <div class="form-check form-switch">
+                                    {{ form.completed }}
+                                    <label class="form-check-label" for="{{ form.completed.id_for_label }}">
+                                        {{ form.completed.label }}
+                                    </label>
+                                </div>
+                                {% if form.completed.help_text %}
+                                    <div class="form-text">{{ form.completed.help_text }}</div>
+                                {% endif %}
+                                {% if form.completed.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.completed.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información adicional si es edición -->
+                    {% if todo %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-info-circle"></i> Información del Todo
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">
+                                                <strong>ID:</strong> #{{ todo.id }}
+                                            </small>
+                                            {% if todo.external_id %}
+                                                <br><small class="text-muted">
+                                                    <strong>ID API:</strong> {{ todo.external_id }}
+                                                </small>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">
+                                                <strong>Usuario:</strong> {{ todo.user.username }}
+                                            </small>
+                                            <br><small class="text-muted">
+                                                <strong>Creado:</strong> {{ todo.created_at|date:"d/m/Y H:i" }}
+                                            </small>
+                                            {% if todo.updated_at != todo.created_at %}
+                                                <br><small class="text-muted">
+                                                    <strong>Actualizado:</strong> {{ todo.updated_at|date:"d/m/Y H:i" }}
+                                                </small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Botones de acción -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{% url 'todo_full_list' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-{% if todo %}check-circle{% else %}plus-circle{% endif %}"></i>
+                                    {% if todo %}Actualizar Todo{% else %}Crear Todo{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview del todo -->
+<div class="row mt-4 justify-content-center">
+    <div class="col-lg-8">
+        <div class="card bg-light">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-eye"></i> Vista Previa
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="todo-preview-title">
+                            {% if todo %}{{ todo.title }}{% else %}Tu título aparecerá aquí...{% endif %}
+                        </h6>
+                        <small class="text-muted">
+                            <i class="bi bi-person"></i> {{ user.username }}
+                            | <i class="bi bi-calendar"></i> {% now "d/m/Y H:i" %}
+                        </small>
+                    </div>
+                    <div>
+                        <span class="badge bg-{% if todo.completed %}success{% else %}warning{% endif %} todo-preview-status">
+                            <i class="bi bi-{% if todo.completed %}check-circle{% else %}clock{% endif %}"></i>
+                            {% if todo.completed %}Completado{% else %}Pendiente{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Actualizar vista previa en tiempo real
+document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+    const completedInput = document.getElementById('{{ form.completed.id_for_label }}');
+    const previewTitle = document.querySelector('.todo-preview-title');
+    const previewStatus = document.querySelector('.todo-preview-status');
+    
+    function updatePreview() {
+        // Actualizar título
+        if (titleInput.value.trim()) {
+            previewTitle.textContent = titleInput.value;
+        } else {
+            previewTitle.textContent = 'Tu título aparecerá aquí...';
+        }
+        
+        // Actualizar estado
+        if (completedInput.checked) {
+            previewStatus.innerHTML = '<i class="bi bi-check-circle"></i> Completado';
+            previewStatus.className = 'badge bg-success todo-preview-status';
+        } else {
+            previewStatus.innerHTML = '<i class="bi bi-clock"></i> Pendiente';
+            previewStatus.className = 'badge bg-warning todo-preview-status';
+        }
+    }
+    
+    if (titleInput) {
+        titleInput.addEventListener('input', updatePreview);
+    }
+    if (completedInput) {
+        completedInput.addEventListener('change', updatePreview);
+    }
+    
+    // Inicializar vista previa
+    updatePreview();
+});
+
+// Validación del formulario
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %}
